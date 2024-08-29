@@ -146,6 +146,17 @@ class OdooAPIManager(APIManager):
         self.models = ModelsMethods(self)
         self.utils = UtilsMethods(self)
 
+        # Información
+        self._info = [
+            f"base de datos: {self._api_db}",
+            f"url de origen: {self._api_url}",
+            f"usuario: {self._api_username}",
+            f"token: {len(self._api_token) * "*"}",
+        ]
+
+        # Eliminación de datos por seguridad
+        self._api_token = len(self._api_token) * "*"
+
     # ----- REVISIÓN DE DERECHOS DE ACCESO -----
     def check_access_rights(
         self,
@@ -792,3 +803,18 @@ class OdooAPIManager(APIManager):
 
         # Retorno del diccionario construído
         return params
+    
+    def info(self) -> None:
+        """
+        ## Información de la sesión
+        Este método retorna una impresión de la información de la sesión actual:
+        ````py
+        odoo.info()
+        # base de datos: your-database-name
+        # url de origen: https://your-database-name.odoo.com
+        # usuario: username_api@example.com
+        # token: ****************************************
+        ````
+        """
+        for i in self._info:
+            print(i)
