@@ -154,9 +154,6 @@ class OdooAPIManager(APIManager):
             f"token: {len(self._api_token) * "*"}",
         ]
 
-        # Eliminación de datos por seguridad
-        self._api_token = len(self._api_token) * "*"
-
     # ----- REVISIÓN DE DERECHOS DE ACCESO -----
     def check_access_rights(
         self,

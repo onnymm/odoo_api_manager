@@ -35,7 +35,7 @@ class DataMethods():
         Por ejemplo, si se especifica un `user_id`, se creará un DataFrame que
         no sólo contenga la columna `user_id` con los valores en fomato
         `[5, 'nombre_usuario']` sino que se crearán dos columnas llamadas
-        `user_id` y `user_name` con los valores `5` y `'nombre_usuario'. Este
+        `user_id` y `user_name` con los valores `5` y `'nombre_usuario'`. Este
         comportamiento se puede desactivar especificando el parámetro
         `separate_many2one` con el valor `False`.
 
