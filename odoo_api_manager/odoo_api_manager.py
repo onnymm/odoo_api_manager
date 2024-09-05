@@ -3,7 +3,7 @@ import xmlrpc.client
 from ._base_api_manager import APIManager
 from ._env_variables import ENV
 from ._options import MODELS, ACCESS_RIGHTS, API_METHODS
-from ._extensions import DataMethods, UtilsMethods, FixMethods, ModelsMethods
+from ._extensions import DataMethods, UtilsMethods, FixMethods, ModelsMethods, ExtensionsRegistry, ExtendMethods
 
 class OdooAPIManager(APIManager):
     """
@@ -117,6 +117,8 @@ class OdooAPIManager(APIManager):
     ````
     """
 
+    extensions = ExtensionsRegistry()
+
     # ----- INICIALIZACIÓN -----
     def __init__(self,
         test_db: bool = False
@@ -145,6 +147,10 @@ class OdooAPIManager(APIManager):
         self.fix = FixMethods(self)
         self.models = ModelsMethods(self)
         self.utils = UtilsMethods(self)
+
+        # Inicialización de módulos externos
+        self._extension_modules = ExtendMethods(self)
+        self._extension_modules._initialize_modules()
 
         # Información
         self._info = [
