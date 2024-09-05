@@ -3,6 +3,8 @@ from ._options import MODELS, ACCESS_RIGHTS, API_METHODS
 
 class APIManager():
     
+    extension_modules = []
+
     def __init__(self) -> None:
         self._common: xmlrpc.client.ServerProxy
         self._models: xmlrpc.client.ServerProxy
