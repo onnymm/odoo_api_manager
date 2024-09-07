@@ -2,8 +2,9 @@ import os
 import xmlrpc.client
 from ._base_api_manager import APIManager
 from ._env_variables import ENV
-from ._options import MODELS, ACCESS_RIGHTS, API_METHODS
+from ._options import ACCESS_RIGHTS, API_METHODS
 from ._extensions import DataMethods, UtilsMethods, FixMethods, ModelsMethods, ExtensionsRegistry, ExtendMethods
+from ._warnings import deprecated
 
 class OdooAPIManager(APIManager):
     """
@@ -149,8 +150,8 @@ class OdooAPIManager(APIManager):
         self.utils = UtilsMethods(self)
 
         # Inicialización de módulos externos
-        self._extension_modules = ExtendMethods(self)
-        self._extension_modules._initialize_modules()
+        self._external_modules = ExtendMethods(self)
+        self._external_modules._initialize_modules()
 
         # Información
         self._info = [
@@ -163,7 +164,7 @@ class OdooAPIManager(APIManager):
     # ----- REVISIÓN DE DERECHOS DE ACCESO -----
     def check_access_rights(
         self,
-        model: MODELS,
+        model: APIManager.odoo_models,
         right: ACCESS_RIGHTS,
     ) -> bool:
         """
@@ -197,8 +198,8 @@ class OdooAPIManager(APIManager):
     # ----- MÉTODO DE BÚSQUEDA -----
     def search(
         self,
-        model: MODELS,
-        search_criteria: list[tuple, str],
+        model: APIManager.odoo_models,
+        search_criteria: APIManager.condition_structure,
         offset: int = None,
         limit: int = None
     ) -> list[int]:
@@ -345,7 +346,7 @@ class OdooAPIManager(APIManager):
     # ----- MÉTODO DE LECTURA -----
     def read(
         self,
-        model: MODELS,
+        model: APIManager.odoo_models,
         record_ids: list[int],
         fields: list[str] = None
     ) -> list[dict]:
@@ -426,8 +427,8 @@ class OdooAPIManager(APIManager):
     # ----- MÉTODO DE BÚSQUEDA Y LECTURA -----
     def search_read(
         self,
-        model: MODELS,
-        data: list[tuple, str],
+        model: APIManager.odoo_models,
+        data: APIManager.condition_structure,
         fields: list[str] = None,
         offset: int = None,
         limit: int = None
@@ -607,6 +608,8 @@ class OdooAPIManager(APIManager):
         odoo.read("sale.order", [52, 87, 129, 132], fields)
         ````
         """
+
+        print("no hace nada", model)
         
         # Ejecución del método de solicitud al API
         return self._request(
@@ -624,8 +627,8 @@ class OdooAPIManager(APIManager):
     # ----- MÉTODO DE CONTEO DE UNA BÚSQUEDA -----
     def search_count(
         self,
-        model: MODELS,
-        data: list[tuple, str]
+        model: APIManager.odoo_models,
+        data: APIManager.condition_structure
     ) -> int:
         """
         ## Método de conteo de una búsqueda
@@ -721,7 +724,7 @@ class OdooAPIManager(APIManager):
     # ----- MÉTODO INTERNO DE ESCRITURA -----
     def _write_single_record(
         self,
-        model: MODELS,
+        model: APIManager.odoo_models,
         record_id: list[dict],
         changes_data: dict[str, int, bool]
     ):
@@ -733,14 +736,29 @@ class OdooAPIManager(APIManager):
                 data_args= changes_data,
             )
         )
+    
+    def session_info(self) -> None:
+        """
+        ## Información de la sesión
+        Este método retorna una impresión de la información de la sesión actual:
+        ````py
+        odoo.session_info()
+        # base de datos: your-database-name
+        # url de origen: https://your-database-name.odoo.com
+        # usuario: username_api@example.com
+        # token: ****************************************
+        ````
+        """
+        for i in self._info:
+            print(i)
 
 
     # ----- SOLICITUD AL API -----
     def _request(
         self,
-        model: MODELS,
+        model: APIManager.odoo_models,
         method: API_METHODS,
-        data: list[tuple, str, list, dict],
+        data: APIManager.condition_structure,
         params: dict[list, int] ={}
     ):
         # Se realiza la solicitud al API
@@ -807,17 +825,12 @@ class OdooAPIManager(APIManager):
         # Retorno del diccionario construído
         return params
     
+    # ------ MÉTODOS DESCONTINUADOS --------
+
+    @deprecated(new_method= session_info)
     def info(self) -> None:
         """
-        ## Información de la sesión
-        Este método retorna una impresión de la información de la sesión actual:
-        ````py
-        odoo.info()
-        # base de datos: your-database-name
-        # url de origen: https://your-database-name.odoo.com
-        # usuario: username_api@example.com
-        # token: ****************************************
-        ````
+        **Obsoleto**: Este método está obsoleto y será removido en futuras versiones.
+        Usar el método OdooAPIManager.session_info()
         """
-        for i in self._info:
-            print(i)
+        self.session_info()

@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 from typing import Literal
 from datetime import datetime, timedelta
+from typing import overload, Literal
 
 class DataMethods():
     """
@@ -11,12 +12,22 @@ class DataMethods():
     Subclase para el uso de métodos relacionados con la consulta de datos
     para su análisis o consulta.
     """
+
+    fields_atts = [
+        'name',
+        'field_description',
+        'model_id',
+        'ttype',
+        'state',
+        'relation'
+    ]
+
     def __init__(self, _instance: APIManager):
         self._instance = _instance
 
     def get_dataset(
         self,
-        model: MODELS,
+        model: APIManager.odoo_models,
         search_criteria: list[tuple, str],
         fields: list,
         separate_many2one: bool= True,
@@ -216,28 +227,122 @@ class DataMethods():
             # Se devuelve el DataFrame sin manipular en caso de que se haya desactivado el parámetro de separación de referencias
             return df
 
+    @overload
     def model_fields(
         self,
-        model: MODELS,
-        atts: list[str] = [
-                'name',
-                'field_description',
-                'model_id',
-                'ttype',
-                'state',
-                'relation'
-            ]
+        model: APIManager.odoo_models,
+        atts: list[str] = ...,
+        fields: list = ...,
+        output: Literal["dataframe", "raw"] = "dataframe"
+    ) -> list:
+        ...
+
+
+    @overload
+    def model_fields(
+        self,
+        model: APIManager.odoo_models,
+        atts: list[str] = ...,
+        fields: list = ...,
+        output: Literal["dataframe", "raw"] = "dataframe"
+    ) -> pd.DataFrame:
+        ...
+
+
+    def model_fields(
+        self,
+        model: APIManager.odoo_models,
+        atts: list[str] = fields_atts,
+        fields: list = None,
+        output: Literal["dataframe", "raw"] = "dataframe"
     ) -> pd.DataFrame:
         """
-        Esto es una documentación
+        ## Obtener información de los campos de un modelo
+        Este método retorna la información más relevante de los campos, en 
+        formato pandas.DataFrame, de un modelo especificado en la función.
+        Todos los modelos están disponibles para su consulta.
+
+        uso:
+        ````py
+        odoo.data.model_fields("sale.order")
+        #         id                       name ...     ttype        relation
+        # 0     9931               access_token ...      char           False
+        # 1     9930                 access_url ...      char           False
+        # 2     9932             access_warning ...      text           False
+        # ...    ...                        ... ...       ...             ...
+        #         id                       name ...     ttype        relation
+        # 127   9993                 write_date ...  datetime           False
+        # 128   9992                  write_uid ...  many2one       res.users
+        ````
+
+        ## Atributos de los campos
+        Las columnas de atributos mostradas por defecto son las siguientes:
+        - `name`: Nombre del campo
+        - `field_description`: Descripción del campo
+        - `model_id`: ID del campo
+        - `ttype`: Tipo del campo
+        - `state`: Estado del campo (`base` para campos nativos y `manual` para campos personalizados)
+        - `relation`: Modelo de relación
+
+        Sin embargo se pueden obtener datos de otros atributos,
+        específicándolos en el parámetro `atts` como una lista:
+        ````py
+        specific_atts = ["name", "field_description", "ttype"]
+        odoo.data.model_fields("sale.order", atts=specific_atts)
+        #                     name  field_description     ttype
+        # 0           access_token     Security Token      char
+        # 1             access_url  Portal Access URL      char
+        # 2         access_warning     Access warning      text
+        # ...                  ...                ...       ...
+        # 126  website_message_ids   Website Messages  one2many
+        # 127           write_date    Last Updated on  datetime
+        # 128            write_uid    Last Updated by  many2one
+        ````
+
+        ## Especificación de campos
+        Por defecto, el método `model_fields` retorna la lista completa de
+        todos los campos del modelo. Sin embargo, si sólo se requieren ciertos
+        campos, puede ser especificado en el parámetro `fields` en una lista:
+        ````py
+        specific_fields = ["id", "name", "state"]
+        odoo.data.model_fields("sale.order", fields=specific_fields)
+        #      id   name ...      ttype  relation
+        # 0  9989     id ...    integer     False
+        # 1  9933   name ...       char     False
+        # 2  9936  state ...  selection     False
+        ````
+
+        ### Formato de retorno
+        Por defecto, el método `model_fields` retorna la información en formato
+        pandas.DataFrame. También existe la opción de retornar el objeto
+        sin manipular retornado desde el API de Odoo, esto, especificado en el
+        parámetro `output`. Los valores disponibles son:
+        - `"dataframe"`: Formato en `pandas.DataFrame` (Opción por defecto).
+        - `"raw"`: Objeto retornado desde el API de Odoo, sin manipular.
         """
+        # Criterio inicial de búsqueda
+        search_criteria = [('model_id', '=', model)]
+
+        # Si se especificaron los campos, se rearma el criterio de búsqueda
+        if (fields):
+            # Se interta el operador 'and' al principio de la lista
+            search_criteria.insert(0, "&")
+            # Se añade la tupla de coincidencia por nombre
+            search_criteria.append(("name", "in", fields))
+
+        # Búsqueda de registros
         data = self._instance.search_read(
             model= "ir.model.fields",
-            data= [('model_id', '=', model)],
+            data= search_criteria,
             fields= atts
         )
 
-        return pd.DataFrame(data)
+        # Evaluación del tipo de salida
+        if output == "dataframe":
+            # Se convierte la respuesta a un pandas.DataFrame
+            data = pd.DataFrame(data)
+
+        return data
     
     def _map_dataframe_ref(self, data, field):
         """"
@@ -420,13 +525,12 @@ class ExtensionsRegistry():
         """
 
         def register_new_module(module):
-            APIManager.extension_modules.append(
+            APIManager._registered_modules.append(
                 {
                     "name": module_name,
                     "declaration": module
                 }
             )
-            print("registro exitoso")
 
         return register_new_module
 
@@ -436,8 +540,8 @@ class ExtendMethods():
         self._instance = instance
 
     def _initialize_modules(self):
-        if len(self._instance.extension_modules) > 0:
-            for module in self._instance.extension_modules:
+        if len(self._instance._registered_modules) > 0:
+            for module in self._instance._registered_modules:
                 setattr(
                     self._instance,
                     module["name"],

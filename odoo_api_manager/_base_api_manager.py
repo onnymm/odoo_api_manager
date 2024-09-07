@@ -1,9 +1,27 @@
 import xmlrpc.client
-from ._options import MODELS, ACCESS_RIGHTS, API_METHODS
+from ._options import MOST_COMMON_FIELDS, MODELS, ACCESS_RIGHTS, API_METHODS
+from typing import Union, Literal, Tuple
 
 class APIManager():
-    
-    extension_modules = []
+
+    # Valores para tipado
+    odoo_models = MODELS
+    condition_structure = Union[
+        list[
+            Union[
+                MOST_COMMON_FIELDS,
+                Tuple[
+                    MOST_COMMON_FIELDS,
+                    # Operaciones disponibles
+                    Literal["=", "!=", "in", "not in", "ilike", "not ilike", ">", "<", ">=", "<="],
+                    Union[int, str, bool, list[int, str]]
+                ]
+            ]
+        ]
+    ]
+
+    # Lista de módulos externos registrados
+    _registered_modules = []
 
     def __init__(self) -> None:
         self._common: xmlrpc.client.ServerProxy
@@ -17,7 +35,7 @@ class APIManager():
 
     def check_access_rights(
         self,
-        model: MODELS,
+        model: odoo_models,
         right: ACCESS_RIGHTS
     ) -> bool:
         ...
@@ -25,7 +43,7 @@ class APIManager():
 
     def search(
         self,
-        model: MODELS,
+        model: odoo_models,
         search_criteria: list[tuple, str],
         offset: int = ...,
         limit: int = ...
@@ -35,7 +53,7 @@ class APIManager():
 
     def read(
         self,
-        model: MODELS,
+        model: odoo_models,
         record_ids: list[int],
         fields: list[str] = ...
     ) -> list[dict]:
@@ -44,7 +62,7 @@ class APIManager():
 
     def search_read(
         self,
-        model: MODELS,
+        model: odoo_models,
         data: list[tuple, str],
         fields: list[str] = ...,
         offset: int = ...,
@@ -55,15 +73,18 @@ class APIManager():
 
     def search_count(
         self,
-        model: MODELS,
+        model: odoo_models,
         data: list[tuple, str]
     ) -> int:
+        ...
+
+    def session_info(self) -> None:
         ...
 
 
     def _write_single_record(
         self,
-        model: MODELS,
+        model: odoo_models,
         record_id: list[dict],
         changes_data: dict[str, int, bool]
     ):
@@ -72,7 +93,7 @@ class APIManager():
 
     def _request(
         self,
-        model: MODELS,
+        model: odoo_models,
         method: API_METHODS,
         data: list[tuple, str, list, dict],
         params: dict[list, int] ={}
