@@ -444,7 +444,6 @@ class UtilsMethods():
         # str(datetime(year, month, day, hour, minute, second) - timedelta(hours=7))
 
     def to_local_date(self, date: str):
-        print(date)
         return str(self._to_datetime(date) + timedelta(hours=self.local_time_difference_in_hours))
     
 class ExtensionsRegistry():

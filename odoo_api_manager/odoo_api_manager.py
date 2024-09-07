@@ -608,8 +608,6 @@ class OdooAPIManager(APIManager):
         odoo.read("sale.order", [52, 87, 129, 132], fields)
         ````
         """
-
-        print("no hace nada", model)
         
         # Ejecución del método de solicitud al API
         return self._request(
