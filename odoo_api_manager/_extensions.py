@@ -1,4 +1,5 @@
 from ._base_api_manager import APIManager
+from ._base_extension import APIManagerExtension
 from ._options import MODELS
 import pandas as pd
 import numpy as np
@@ -6,7 +7,7 @@ from typing import Literal
 from datetime import datetime, timedelta
 from typing import overload, Literal
 
-class DataMethods():
+class DataMethods(APIManagerExtension):
     """
     ## Extensión de la clase `OdooAPIManager`
     Subclase para el uso de métodos relacionados con la consulta de datos
@@ -21,9 +22,6 @@ class DataMethods():
         'state',
         'relation'
     ]
-
-    def __init__(self, _instance: APIManager):
-        self._instance = _instance
 
     def get_dataset(
         self,
@@ -369,15 +367,12 @@ class DataMethods():
         else:
             return sample
 
-class FixMethods():
+class FixMethods(APIManagerExtension):
     """
     ## Extensión de la clase `OdooAPIManager`
     Subclase para el uso de métodos relacionados con la corrección
     preestablecida para excepciones en procesos administrativos dentro de Odoo.
     """
-
-    def __init__(self, _instance: APIManager):
-        self._instance = _instance
 
     # ----- CIERRE DE CICLO DE VIDA EN ESTADOS DE ÓRDENES DE VENTA -----
     def close_sale_order_status(
@@ -401,7 +396,7 @@ class FixMethods():
         else:
             "No fue posible actualizar el registro"
 
-class ModelsMethods():
+class ModelsMethods(APIManagerExtension):
     """
     ## Submódulo para desencadenar acciones de modelos
     """
@@ -415,9 +410,6 @@ class ModelsMethods():
         }
     }
 
-    def __init__(self, _instance: APIManager):
-        self._instance = _instance
-
     def sale_order_exec(self, method: Literal["confirm"], record_id: int):
         actions = self._actions["sale.order"]
         self._instance._request("sale.order", actions[method], [[record_id]])
@@ -429,12 +421,9 @@ class ModelsMethods():
         except:
             pass
 
-class UtilsMethods():
+class UtilsMethods(APIManagerExtension):
 
     local_time_difference_in_hours = -7
-
-    def __init__(self, _instance: APIManager):
-        self._instance = _instance
 
     def _to_datetime(self, string_date: str) -> datetime:
         [date, time] = string_date.split(" ")
@@ -533,13 +522,11 @@ class ExtensionsRegistry():
 
         return register_new_module
 
-class ExtendMethods():
-
-    def __init__(self, instance: APIManager):
-        self._instance = instance
+class ExtendMethods(APIManagerExtension):
 
     def _initialize_modules(self):
         if len(self._instance._registered_modules) > 0:
+            print("Se inicializa")
             for module in self._instance._registered_modules:
                 setattr(
                     self._instance,

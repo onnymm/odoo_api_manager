@@ -3,6 +3,7 @@ import xmlrpc.client
 from ._base_api_manager import APIManager
 from ._env_variables import ENV
 from ._options import ACCESS_RIGHTS, API_METHODS
+from ._base_extension import APIManagerExtension
 from ._extensions import DataMethods, UtilsMethods, FixMethods, ModelsMethods, ExtensionsRegistry, ExtendMethods
 from ._warnings import deprecated
 
@@ -823,6 +824,26 @@ class OdooAPIManager(APIManager):
         # Retorno del diccionario construído
         return params
     
+
+    @classmethod
+    def extension_class_template(cls):
+        """
+        ## Generación de clase de extensión de `OdooAPIManager`
+        Este método de clase retorna una plantilla de constructor para la
+        creación de módulos externos.
+
+        Uso:
+        ````py
+        ExtensionModule = OdooAPIManager.extension_class_template()
+
+        @OdooAPIManager.extensions.register_module("iacele")
+        class MyCustomModule(ExtensionModule):
+            ...
+        ````
+        """
+        return APIManagerExtension
+
+
     # ------ MÉTODOS DESCONTINUADOS --------
 
     @deprecated(new_method= session_info)
