@@ -4,8 +4,9 @@ from ._base_api_manager import APIManager
 from ._env_variables import ENV
 from ._options import ACCESS_RIGHTS, API_METHODS
 from ._base_extension import APIManagerExtension
-from ._extensions import DataMethods, UtilsMethods, FixMethods, ModelsMethods, ExtensionsRegistry, ExtendMethods
+from ._extensions import DataMethods, ExtensionsRegistry, ExtendMethods
 from ._warnings import deprecated
+from .typing import condition_structure
 
 class OdooAPIManager(APIManager):
     """
@@ -146,9 +147,6 @@ class OdooAPIManager(APIManager):
 
         # Módulos de extensión
         self.data = DataMethods(self)
-        self.fix = FixMethods(self)
-        self.models = ModelsMethods(self)
-        self.utils = UtilsMethods(self)
 
         # Inicialización de módulos externos
         self._external_modules = ExtendMethods(self)
@@ -200,7 +198,7 @@ class OdooAPIManager(APIManager):
     def search(
         self,
         model: APIManager.odoo_models,
-        search_criteria: APIManager.condition_structure,
+        search_criteria: condition_structure,
         offset: int = None,
         limit: int = None
     ) -> list[int]:
@@ -429,7 +427,7 @@ class OdooAPIManager(APIManager):
     def search_read(
         self,
         model: APIManager.odoo_models,
-        data: APIManager.condition_structure,
+        data: condition_structure,
         fields: list[str] = None,
         offset: int = None,
         limit: int = None
@@ -627,7 +625,7 @@ class OdooAPIManager(APIManager):
     def search_count(
         self,
         model: APIManager.odoo_models,
-        data: APIManager.condition_structure
+        data: condition_structure
     ) -> int:
         """
         ## Método de conteo de una búsqueda
@@ -757,7 +755,7 @@ class OdooAPIManager(APIManager):
         self,
         model: APIManager.odoo_models,
         method: API_METHODS,
-        data: APIManager.condition_structure,
+        data: condition_structure,
         params: dict[list, int] ={}
     ):
         # Se realiza la solicitud al API
