@@ -28,8 +28,8 @@ class DataMethods(APIManagerExtension):
         model: APIManager.odoo_models,
         search_criteria: list[tuple, str],
         fields: list,
-        offset: int,
-        limit: int,
+        offset: int | None = None,
+        limit: int | None = None,
         many2one_values: Literal["id_only", "name_only", "pair", "raw"] = "pair",
     ) -> pd.DataFrame:
         """
