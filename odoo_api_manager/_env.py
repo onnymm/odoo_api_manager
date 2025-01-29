@@ -6,7 +6,7 @@ class _Env():
     _password = 'ODOO_API_PASSWORD'
     _url = 'ODOO_API_URL'
     _api_db = 'ODOO_API_DB'
-    _api_test_db = 'ODOO_API_TEST_DB'
+    _api_test_db = 'ODOO_API_ALT_DB'
 
     def __init__(self, alt_api_db: bool | str | None = None) -> None:
         self.username = os.environ.get(self._username)

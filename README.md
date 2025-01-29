@@ -13,7 +13,7 @@ odoo = OdooAPIManager()
 
 Para crear una conexión a una base de datos de prueba o una base de datos alternativa, se debe proveer el valor `True` (En caso de haberse declarado una base de datos alternativa en el archivo `env.`) o el nombre de la base de datos alternativa en el argumento `alt_db`:
 ```py
-odoo_test = OdooAPIManager(test_db=True)
+odoo_test = OdooAPIManager(alt_db=True)
 ```
 
 
@@ -25,7 +25,7 @@ ODOO_API_TOKEN = 1234567890abcdefghijklmnopqrstuvwxyz1234
 ODOO_API_PASSWORD = thisisapassword321
 ODOO_API_URL = https://your-database-name.odoo.com
 ODOO_API_DB = your-database-name
-ODOO_API_TEST_DB = your-database-name-test
+ODOO_API_ALT_DB = your-database-name-test
 
 ```
 ----
