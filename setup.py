@@ -3,12 +3,11 @@ from setuptools import setup, find_packages
 setup(
     # Library name and version
     name="odoo_api_manager",
-    version="0.1.9",
+    version="0.2.2",
     
     # Dependencies
     install_requires=[
-        "pandas==2.2.2",
-        "numpy==2.0.0"
+        "pandas",
     ],
 
     # My name here
