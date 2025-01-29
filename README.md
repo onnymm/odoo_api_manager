@@ -1,5 +1,5 @@
 ## Conexión al API de Odoo
-Creador de una conexión con el sistema de Odoo a través del API. Puede ser a la base de datos principal o a una base de datos de prueba provista en el archivo `.env`
+Creador de una conexión con el sistema de Odoo a través del API. Puede ser a la base de datos principal o a una base de datos de de prueba o alternativa provista en el archivo `.env`
 
 Instalación:
 ```bash
@@ -244,7 +244,7 @@ están disponibles para su consulta.
 
 uso:
 ```py
-odoo.data.model_fields("sale.order")
+odoo.model_fields("sale.order")
 #         id                       name ...     ttype        relation
 # 0     9931               access_token ...      char           False
 # 1     9930                 access_url ...      char           False
