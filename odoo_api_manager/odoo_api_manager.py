@@ -489,7 +489,7 @@ class OdooAPIManager():
     def read(
         self,
         model: odoo_names.MODELS,
-        record_ids: list[int],
+        record_ids: int | list[int],
         fields: list[str] | None = None,
         output: OutputOptions | None = None,
     ) -> list[dict] | pd.DataFrame:
@@ -551,10 +551,14 @@ class OdooAPIManager():
         >>> odoo.read("sale.order", [52, 87, 129, 132], fields)
         """
 
+        # Conversión a lista de enteros si la entrada es una ID en entero
+        if isinstance(record_ids, int):
+            record_ids = [record_ids]
+
         # Obtención de los datos a partir del método de solicitud al API
         response = self._request(
             model= model,
-            method= 'search_read',
+            method= 'read',
             data= [record_ids],
             params= self._build_params(
                 fields= fields,
@@ -563,6 +567,82 @@ class OdooAPIManager():
 
         # Retorno en formato de salida configurado
         return self._build_output(response, output)
+
+    def get_value(
+        self,
+        model: odoo_names.MODELS,
+        record_id: int,
+        field: str,
+    ) -> Any:
+        """
+        ## Obtención del valor de un registro
+        Este método obtiene el valor de un campo de un registro especificado.
+
+        Uso:
+        >>> odoo.get_value('product.template', 53, 'list_price')
+        >>> # 7.40
+        """
+
+        # Obtención del registro
+        response = self.read(
+            model,
+            [record_id],
+            [field],
+            output= 'dict'
+        )
+
+        # Si no existe el registro se retorna un None para evitar errores
+        if not response:
+            return None
+
+        else:
+            # Se destructura el registro de la lista
+            [ record ] = response
+
+        # Se retorna el valor del registro
+        return record[field]
+
+    def get_values(
+        self,
+        model: odoo_names.MODELS,
+        record_ids: list[int],
+        fields: list[str]
+    ) -> tuple[Any]:
+        """
+        ## Obtención de valores de un registro
+        Este método obtiene los valores de los campos especificados de un
+        registro especificado.
+
+        Uso:
+        >>> odoo.get_values('product.template', 53, ['name', 'list_price'])
+        >>> # ('Café', 7.40)
+        
+        Los valores también pueden ser destructurados para ser guardados
+        directamente en variables:
+        >>> name, price = odoo.get_values('product.template', 53, ['name', 'list_price'])
+        >>> name
+        >>> # 'Café'
+        >>> price
+        >>> # 7.40
+        """
+
+        # Obtención del registro
+        response = self.read(
+            model,
+            record_ids,
+            fields,
+            output= 'dict'
+        )
+
+        # Si no existe el registro se retorna un None para evitar errores
+        if not response:
+            return None
+
+        else:
+            # Se destructura el registro de la lista
+            [ record ] = response
+
+        return tuple([record[field] for field in fields])
 
     def search_read(
         self,
