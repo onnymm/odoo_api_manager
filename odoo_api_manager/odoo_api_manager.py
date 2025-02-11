@@ -294,7 +294,7 @@ class OdooAPIManager():
             f"base de datos: {self._env.api_db}",
             f"url de origen: {self._env.url}",
             f"usuario: {self._env.username}",
-            f"token: {len(self._env.token) * "*"}",
+            f"token: {len(self._env.token) * '*'}",
         ]
 
     @property
