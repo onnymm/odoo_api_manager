@@ -15,7 +15,10 @@ class _Env():
         self.url = os.environ.get(self._url)
 
         if isinstance(alt_api_db, bool):
-            self.api_db = os.environ.get(self._api_test_db)
+            if alt_api_db:
+                self.api_db = os.environ.get(self._api_test_db)
+            else:
+                self.api_db = os.environ.get(self._api_db)
         elif isinstance(alt_api_db, str):
             self.api_db = os.environ.get(alt_api_db)
         else:
