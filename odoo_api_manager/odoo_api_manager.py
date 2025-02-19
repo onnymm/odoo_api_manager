@@ -368,7 +368,7 @@ class OdooAPIManager():
     def search(
         self,
         model: odoo_names.MODELS,
-        search_criteria: CriteriaStructure,
+        search_criteria: CriteriaStructure = [],
         offset: int | None = None,
         limit: int | None = None
     ) -> list[int]:
@@ -647,7 +647,7 @@ class OdooAPIManager():
     def search_read(
         self,
         model: odoo_names.MODELS,
-        data: CriteriaStructure,
+        data: CriteriaStructure = [],
         fields: list[str] = None,
         offset: int = None,
         limit: int = None,
