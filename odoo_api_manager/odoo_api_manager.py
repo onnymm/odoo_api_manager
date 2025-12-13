@@ -1,12 +1,12 @@
 import pandas as pd
-from xmlrpc import client
 from typing import Any
+from xmlrpc import client
 from ._typing import (
     API_METHODS,
     ACCESS_RIGHTS,
     odoo_names,
-    OutputOptions,
     CriteriaStructure,
+    OutputOptions,
 )
 from ._env import _Env
 
@@ -822,7 +822,7 @@ class OdooAPIManager():
     def search_count(
         self,
         model: odoo_names.MODELS,
-        data: CriteriaStructure
+        data: CriteriaStructure = []
     ) -> int:
         """
         ## Conteo de una búsqueda
