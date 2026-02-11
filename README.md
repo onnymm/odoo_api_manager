@@ -23,6 +23,7 @@ odoo_api = OdooAPIManager()
     - [Conteo de una búsqueda](#conteo-de-una-búsqueda)
     - [Actualización de registros](#actualización-de-registros)
     - [Eliminación de registros](#eliminación-de-registros)
+    - [Ejecución de métodos](#ejecución-de-métodos)
     - [Obtener información de los campos de un modelo](#obtener-información-de-los-campos-de-un-modelo)
 - **ACERCA DE...**
     - [Configuración del entorno de trabajo](#configuración-del-entorno-de-trabajo)
@@ -280,6 +281,27 @@ odoo_api.unlink("sale.order", [52, 87, 129])
 > - `model`*: Nombre del modelo.
 > - `record_ids`* ID o lista de IDs de registros a eliminar en el modelo.
 > - `records_data`*  Diccionario que contiene los datos a eliminar.
+
+----
+
+## Ejecución de métodos
+Este método ejecuta el método de un modelo en Odoo.
+
+Uso:
+```py
+odoo_api.execute('sale.order', 'action_confirm', [15])
+```
+
+Esto permite "presionar botones de interfaz" directamente desde la API.
+
+> Nota: Exiten algunos métodos que abren una ventana para ser completados. La ejecución de de este tipo de métodos no está soportada por esta librería.
+
+> **PARÁMETROS**
+> 
+> - `model`*: Nombre del modelo.
+> - `method`* Nombre del método a ejecutar.
+> - `record_ids`* ID o lista de IDs de registros sobre los que se ejecuta el método.
+> - `kwargs` Diccionario de argumentos proporcionados al método a ejecutar.
 
 ----
 

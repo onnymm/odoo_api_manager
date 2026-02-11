@@ -586,7 +586,9 @@ class OdooAPIManager(Generic[_O]):
         records_data = self._convert_to_list(records_data)
 
         # Construcción de parámetros
-        params = Params(records_data= records_data)
+        params = Params(
+            records_data= records_data,
+        )
 
         # Ejecución del método de solicitud al API
         response = self._request(
@@ -1238,7 +1240,7 @@ class OdooAPIManager(Generic[_O]):
 
         # Construcción de parámetros
         params = Params(
-            record_ids= record_ids
+            record_ids= record_ids,
         )
 
         # Ejecución del método de solicitud al API
@@ -1249,6 +1251,56 @@ class OdooAPIManager(Generic[_O]):
         )
 
         return response
+
+    def execute(
+        self,
+        model: ModelName,
+        method: str,
+        record_ids: ListOrItem[RecordID],
+        kwargs: dict[str, SerializableValue] = {},
+    ) -> Literal[True]:
+        """
+        ## Ejecución de método de modelo
+        Este método ejecuta el método de un modelo en Odoo.
+
+        Uso:
+        >>> odoo_api.execute('sale.order', 'action_confirm', [15])
+
+        Esto permite "presionar botones de interfaz" directamente desde la API.
+
+        Nota: Exiten algunos métodos que abren una ventana para ser completados. La
+        ejecución de de este tipo de métodos no está soportada por esta librería.
+        """
+
+        # Se acondiciona el valor de datos
+        record_ids = self._convert_to_list(record_ids)
+
+        # Construcción de parámetros
+        params = Params(
+            record_ids= record_ids,
+            kwargs= kwargs,
+        )
+
+        # Ejecución del método de solicitud al API
+        response = self._request(
+            model= model,
+            method= method,
+            args= params.args,
+            kwargs= kwargs,
+        )
+
+        # Si un diccionario fue recibido...
+        if isinstance(response, dict):
+            # Se indica que la ejecución del método está fuera del alcance de la librería
+            raise NotImplementedError(
+                'Este método requiere una interacción de interfaz para ser ejecutado.\n'
+                'No se completó la ejecución.'
+            )
+
+        # Si un `True` fue recibido...
+        else:
+
+            return response
 
     def model_fields(
         self,

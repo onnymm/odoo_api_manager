@@ -6,6 +6,7 @@ from .._typing import (
     AccessRights,
     ListOrItem,
     ModelField,
+    SerializableValue,
 )
 
 class Params:
@@ -21,6 +22,7 @@ class Params:
         limit: Optional[int] = None,
         raise_exception: Optional[bool] = None,
         right_type: Optional[AccessRights] = None,
+        kwargs: dict[str, SerializableValue] = None,
     ) -> None:
 
         # Plantilla de args
@@ -32,6 +34,7 @@ class Params:
             'offset': offset,
             'limit': limit,
             'raise_exception': raise_exception,
+            'kwargs': kwargs,
         }
 
         # Construcción de args y kwargs
@@ -62,6 +65,16 @@ class Params:
         Este método interno construye un diccionario de kwargs que tienen valores
         diferentes a None para ser usados en solicitudes al API.
         """
+
+        # Si existen valores en llave 'kwargs'...
+        if self.kwargs['kwargs'] is not None:
+            # Se toma una copia de ésta
+            kwargs = self.kwargs['kwargs'].copy()
+            # Se transcriben los argumentos al objeto
+            for ( k, v ) in kwargs.items():
+                self.kwargs[k] = v
+            # Se elimina la referencia
+            del self.kwargs['kwargs']
 
         # Construcción de kwargs sin valores nulos
         self.kwargs = {
