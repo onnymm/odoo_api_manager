@@ -4,14 +4,14 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "odoo_api_manager"
-version = "0.3.1"
+version = "0.3.2"
 authors = [
     {name = "Pável Hernández Reza", email = "phr2807@gmail.com" }]
 description = "Librería para el manejo de la API de Odoo."
 readme = "README.md"
 license = "MIT"
 dependencies = [
-    "pandas~=2.2.3",
+    "pandas~=2.3.3",
     "dotenvironment~=1.1.0",
 ]
 

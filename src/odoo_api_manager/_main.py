@@ -1408,8 +1408,6 @@ class OdooAPIManager(Generic[_O]):
         # Creación de la conexión models para realizar solicitudes
         self._models = client.ServerProxy(xmlrpc_object)
 
-        print(self._uid)
-
         # Inicialización de la información de la sesión
         self._initialize_session_info()
 
