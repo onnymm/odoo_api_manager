@@ -1,1 +1,1 @@
-from .odoo_api_manager import OdooAPIManager
+from ._main import OdooAPIManager

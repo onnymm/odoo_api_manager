@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 setup(
     # Library name and version
     name="odoo_api_manager",
-    version="0.2.8",
+    version="0.3.0",
     
     # Dependencies
     install_requires=[

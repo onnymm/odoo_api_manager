@@ -1,16 +1,46 @@
 import pandas as pd
-from typing import Any
 from xmlrpc import client
-from ._typing import (
-    API_METHODS,
-    ACCESS_RIGHTS,
-    odoo_names,
-    CriteriaStructure,
-    OutputOptions,
+from typing import (
+    Literal,
+    Generic,
+    Optional,
+    Union,
+    overload,
 )
-from ._env import _Env
+from ._resources import (
+    Credentials,
+    Params,
+)
+from ._settings import (
+    PRESETS,
+)
+from ._templates import (
+    SESSION_INFO,
+    XMLRPC_COMMON,
+    XMLRPC_OBJECT,
+)
+from ._typing import (
+    _O,
+    _T,
+    CriteriaStructure,
+    RecordData,
+    RecordID,
+    AccessRights,
+    APIMethods,
+    FieldFields,
+    ListOrItem,
+    ModelField,
+    ModelName,
+    OutputOptions,
+    SerializableValue,
+)
 
-class OdooAPIManager():
+class DatabaseNotDefinedError(Exception):
+    ...
+
+DatabaseArg = Union[str, bool]
+
+class OdooAPIManager(Generic[_O]):
     """
     # Conexión al API de Odoo
     Creador de una conexión con el sistema de Odoo a través del API. Puede ser
@@ -32,7 +62,6 @@ class OdooAPIManager():
     ```env
     ODOO_API_USERNAME = username_api@example.com
     ODOO_API_TOKEN = 1234567890abcdefghijklmnopqrstuvwxyz1234
-    ODOO_API_PASSWORD = thisisapassword321
     ODOO_API_URL = https://your-database-name.odoo.com
     ODOO_API_DB = your-database-name
     ODOO_API_TEST_DB = your-database-name-test
@@ -255,60 +284,247 @@ class OdooAPIManager():
     >>> # token: ****************************************
     """
 
-    fields_atts = [
-        'name',
-        'field_description',
-        'model_id',
-        'ttype',
-        'state',
-        'relation'
-    ]
+    @overload
+    def __init__(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        alt_db: Optional[bool | str] = None,
+        default_output: Optional[Literal['dataframe']] = 'dataframe',
+    ) -> None:
+        ...
+    @overload
+    def __init__(
+        self: "OdooAPIManager[Literal['dict']]",
+        alt_db: Optional[bool | str] = None,
+        default_output: Literal['dict'] = 'dict',
+    ) -> None:
+        ...
+    @overload
+    def read(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        fields: Optional[list[ModelField]] = None,
+        output: Optional[Literal['dataframe']] = None,
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def read(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        fields: Optional[list[ModelField]] = None,
+        output: Literal['dict'] = None,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def read(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        fields: Optional[list[ModelField]] = None,
+        output: Optional[Literal['dict']] = None,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def read(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        fields: Optional[list[ModelField]] = None,
+        output: Literal['dataframe'] = None,
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def search_read(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        search_criteria: CriteriaStructure = [],
+        fields: Optional[list[ModelField]] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        output: Optional[Literal['dataframe']] = None,
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def search_read(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        search_criteria: CriteriaStructure = [],
+        fields: Optional[list[ModelField]] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        output: Literal['dict'] = 'dict',
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def search_read(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        search_criteria: CriteriaStructure = [],
+        fields: Optional[list[ModelField]] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        output: Optional[Literal['dict']] = None,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def search_read(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        search_criteria: CriteriaStructure = [],
+        fields: Optional[list[ModelField]] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        output: Literal['dataframe'] = 'dataframe',
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def model_fields(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        attributes: list[FieldFields] = PRESETS.FIELDS_ATTS,
+        fields: list[ModelField] | None = None,
+        output: Optional[Literal['dataframe']] = None,
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def model_fields(
+        self: "OdooAPIManager[Literal['dataframe']]",
+        model: ModelName,
+        attributes: list[FieldFields] = PRESETS.FIELDS_ATTS,
+        fields: list[ModelField] | None = None,
+        output: Literal['dict'] = 'dict',
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def model_fields(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        attributes: list[FieldFields] = PRESETS.FIELDS_ATTS,
+        fields: list[ModelField] | None = None,
+        output: Optional[Literal['dict']] = None,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def model_fields(
+        self: "OdooAPIManager[Literal['dict']]",
+        model: ModelName,
+        attributes: list[FieldFields] = PRESETS.FIELDS_ATTS,
+        fields: list[ModelField] | None = None,
+        output: Literal['dataframe'] = 'dataframe',
+    ) -> pd.DataFrame:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['check_access_rights'],
+        args: list,
+        kwargs: dict,
+    ) -> bool:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['create'],
+        args: list,
+    ) -> list[RecordID]:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['search'],
+        args: list,
+        kwargs: dict,
+    ) -> list[RecordID]:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['read'],
+        args: list,
+        kwargs: dict,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['search_read'],
+        args: list,
+        kwargs: dict,
+    ) -> list[RecordData]:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['search_count'],
+        args: list,
+    ) -> int:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['write'],
+        args: list,
+    ) -> Literal[True]:
+        ...
+    @overload
+    def _request(
+        self,
+        /,
+        model: ModelName,
+        method: Literal['unlink'],
+        args: list,
+    ) -> Literal[True]:
+        ...
 
-    def __init__(self,
+
+
+    def __init__(
+        self,
         alt_db: bool | str | None = None,
         default_output: OutputOptions = 'dataframe',
     ) -> None:
 
         # Obtención de las variables de entorno
-        self._env = _Env(alt_db)
-        # Creación de la conexión common para autenticar el usuario
-        self._common = client.ServerProxy(f"{self._env.url}/xmlrpc/2/common")
-        # Token de autenticación
-        self._uid = (
-            self._common
-            .authenticate(
-                self._env.api_db,
-                self._env.username,
-                self._env.token,
-                {}
-            )
-        )
-        # Creación de la conexión models para realizar solicitudes
-        self._models = client.ServerProxy(f"{self._env.url}/xmlrpc/2/object")
-
+        self._credentials = Credentials(alt_db)
         # Se configura el formato de salida de la información
         self._default_output = default_output
 
-        # Información
-        self._info = [
-            f"base de datos: {self._env.api_db}",
-            f"url de origen: {self._env.url}",
-            f"usuario: {self._env.username}",
-            f"token: {len(self._env.token) * '*'}",
-        ]
+        # Inicialización de Proxy
+        self._initialize_proxy()
 
     @property
-    def version(self) -> dict:
+    def version(
+        self,
+    ) -> dict:
         """
         Versión del sistema Odoo con el que se tiene conexión.
         """
-        return self._common.version()
+
+        # Obtención de los datos
+        v = self._common.version()
+
+        return v
 
     def check_access_rights(
         self,
-        model: odoo_names.MODELS,
-        right_type: ACCESS_RIGHTS,
-        raise_exception: bool= False
+        model: ModelName,
+        right_type: AccessRights,
+        raise_exception: bool = False,
     ) -> bool:
         """
         ## Permisos de acceso
@@ -324,18 +540,26 @@ class OdooAPIManager():
         - `unlink`: Permiso de eliminación
         """
 
+        # Construcción de parámetros
+        params = Params(
+            right_type= right_type,
+            raise_exception= raise_exception,
+        )
+
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'check_access_rights',
-            data= [right_type],
-            params= {'raise_exception': raise_exception}
+            args= params.args,
+            kwargs= params.kwargs,
         )
+
+        return response
 
     def create(
         self,
-        model: odoo_names.MODELS,
-        data: dict[str, Any],
+        model: ModelName,
+        records_data: ListOrItem[RecordData],
     ) -> int:
         """
         ## Creación de registro
@@ -358,19 +582,27 @@ class OdooAPIManager():
         `OdooAPIManager.model_fields`.
         """
 
+        # Se acondiciona el valor de datos
+        records_data = self._convert_to_list(records_data)
+
+        # Construcción de parámetros
+        params = Params(records_data= records_data)
+
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'create',
-            data= [data],
+            args= params.args,
         )
+
+        return response
 
     def search(
         self,
-        model: odoo_names.MODELS,
+        model: ModelName,
         search_criteria: CriteriaStructure = [],
-        offset: int | None = None,
-        limit: int | None = None
+        offset: Optional[int] = None,
+        limit: Optional[int] = None
     ) -> list[int]:
         """
         ## Búsqueda de registros
@@ -475,23 +707,107 @@ class OdooAPIManager():
         >>> odoo.search("sale.order", criteria)
         """
 
+        # Construcción de parámetros
+        params = Params(
+            search_criteria= search_criteria,
+            offset= offset,
+            limit= limit,
+        )
+
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'search',
-            data= [search_criteria],
-            params= self._build_params(
-                offset= offset,
-                limit= limit
-            )
+            args= params.args,
+            kwargs= params.kwargs,
         )
+
+        return response
+
+    def get_value(
+        self,
+        model: ModelName,
+        record_id: RecordID,
+        field: ModelField,
+    ) -> SerializableValue:
+        """
+        ## Obtención del valor de un registro
+        Este método obtiene el valor de un campo de un registro especificado.
+
+        Uso:
+        >>> odoo.get_value('product.template', 53, 'list_price')
+        >>> # 7.40
+        """
+
+        # Obtención del registro
+        response = self.read(
+            model,
+            [record_id],
+            [field],
+            output= 'dict',
+        )
+
+        # Si no existe el registro se retorna un None para evitar errores
+        if not response:
+            return None
+
+        else:
+            # Se destructura el registro de la lista
+            [ record ] = response
+
+        # Se retorna el valor del registro
+        value = record[field]
+
+        return value
+
+    def get_values(
+        self,
+        model: ModelName,
+        record_ids: RecordID,
+        fields: list[ModelField]
+    ) -> tuple[SerializableValue]:
+        """
+        ## Obtención de valores de un registro
+        Este método obtiene los valores de los campos especificados de un
+        registro especificado.
+
+        Uso:
+        >>> odoo.get_values('product.template', 53, ['name', 'list_price'])
+        >>> # ('Café', 7.40)
+        
+        Los valores también pueden ser destructurados para ser guardados
+        directamente en variables:
+        >>> name, price = odoo.get_values('product.template', 53, ['name', 'list_price'])
+        >>> name
+        >>> # 'Café'
+        >>> price
+        >>> # 7.40
+        """
+
+        # Obtención del registro
+        response = self.read(
+            model,
+            record_ids,
+            fields,
+            output= 'dict'
+        )
+
+        # Si no existe el registro se retorna un None para evitar errores
+        if not response:
+            return None
+
+        else:
+            # Se destructura el registro de la lista
+            [ record ] = response
+
+        return tuple([record[field] for field in fields])
 
     def read(
         self,
-        model: odoo_names.MODELS,
-        record_ids: int | list[int],
-        fields: list[str] | None = None,
-        output: OutputOptions | None = None,
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        fields: Optional[list[ModelField]] = None,
+        output: Optional[OutputOptions] = None,
     ) -> list[dict] | pd.DataFrame:
         """
         ## Lectura de registros
@@ -551,107 +867,36 @@ class OdooAPIManager():
         >>> odoo.read("sale.order", [52, 87, 129, 132], fields)
         """
 
-        # Conversión a lista de enteros si la entrada es una ID en entero
-        if isinstance(record_ids, int):
-            record_ids = [record_ids]
+        # Se acondiciona el valor de datos
+        record_ids = self._convert_to_list(record_ids)
+
+        # Construcción de parámetros
+        params = Params(
+            record_ids= record_ids,
+            fields= fields,
+        )
 
         # Obtención de los datos a partir del método de solicitud al API
         response = self._request(
             model= model,
             method= 'read',
-            data= [record_ids],
-            params= self._build_params(
-                fields= fields,
-            )
+            args= params.args,
+            kwargs= params.kwargs,
         )
 
-        # Retorno en formato de salida configurado
-        return self._build_output(response, output)
+        # Conversión en formato de salida configurado
+        converted_data = self._build_output(response, output)
 
-    def get_value(
-        self,
-        model: odoo_names.MODELS,
-        record_id: int,
-        field: str,
-    ) -> Any:
-        """
-        ## Obtención del valor de un registro
-        Este método obtiene el valor de un campo de un registro especificado.
-
-        Uso:
-        >>> odoo.get_value('product.template', 53, 'list_price')
-        >>> # 7.40
-        """
-
-        # Obtención del registro
-        response = self.read(
-            model,
-            [record_id],
-            [field],
-            output= 'dict'
-        )
-
-        # Si no existe el registro se retorna un None para evitar errores
-        if not response:
-            return None
-
-        else:
-            # Se destructura el registro de la lista
-            [ record ] = response
-
-        # Se retorna el valor del registro
-        return record[field]
-
-    def get_values(
-        self,
-        model: odoo_names.MODELS,
-        record_ids: list[int],
-        fields: list[str]
-    ) -> tuple[Any]:
-        """
-        ## Obtención de valores de un registro
-        Este método obtiene los valores de los campos especificados de un
-        registro especificado.
-
-        Uso:
-        >>> odoo.get_values('product.template', 53, ['name', 'list_price'])
-        >>> # ('Café', 7.40)
-        
-        Los valores también pueden ser destructurados para ser guardados
-        directamente en variables:
-        >>> name, price = odoo.get_values('product.template', 53, ['name', 'list_price'])
-        >>> name
-        >>> # 'Café'
-        >>> price
-        >>> # 7.40
-        """
-
-        # Obtención del registro
-        response = self.read(
-            model,
-            record_ids,
-            fields,
-            output= 'dict'
-        )
-
-        # Si no existe el registro se retorna un None para evitar errores
-        if not response:
-            return None
-
-        else:
-            # Se destructura el registro de la lista
-            [ record ] = response
-
-        return tuple([record[field] for field in fields])
+        return converted_data
 
     def search_read(
         self,
-        model: odoo_names.MODELS,
-        data: CriteriaStructure = [],
-        fields: list[str] = None,
-        offset: int = None,
-        limit: int = None,
-        output: OutputOptions | None = None,
+        model: ModelName,
+        search_criteria: CriteriaStructure = [],
+        fields: list[ModelField] = None,
+        offset: Optional[int] = None,
+        limit: Optional[int] = None,
+        output: Optional[OutputOptions] = None,
     ):
         """
         ## Búsqueda y lectura de registros
@@ -804,25 +1049,31 @@ class OdooAPIManager():
         >>> odoo.search_read("sale.order", [(...)], fields)
         """
 
+        # Construcción de parámetros
+        params = Params(
+            search_criteria= search_criteria,
+            fields= fields,
+            offset= offset,
+            limit= limit,
+        )
+
         # Obtención de los datos a partir del método de solicitud al API
         response = self._request(
             model= model,
             method= 'search_read',
-            data= [data],
-            params= self._build_params(
-                fields= fields,
-                offset= offset,
-                limit= limit
-            )
+            args= params.args,
+            kwargs= params.kwargs,
         )
 
-        # Retorno en formato de salida configurado
-        return self._build_output(response, output)
+        # Conversión en formato de salida configurado
+        converted_data = self._build_output(response, output)
+
+        return converted_data
 
     def search_count(
         self,
-        model: odoo_names.MODELS,
-        data: CriteriaStructure = []
+        model: ModelName,
+        search_criteria: CriteriaStructure = []
     ) -> int:
         """
         ## Conteo de una búsqueda
@@ -905,19 +1156,26 @@ class OdooAPIManager():
         >>> odoo.search_read("sale.order", criteria)
         """
 
+        # Construcción de parámetros
+        params = Params(
+            search_criteria= search_criteria,
+        )
+
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'search_count',
-            data= [data],
+            args= params.args,
         )
+
+        return response
 
     def write(
         self,
-        model: odoo_names.MODELS,
-        record_ids: int | list[int],
-        data: dict[str, Any]
-    ) -> bool:
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+        record_data: RecordData,
+    ) -> Literal[True]:
         """
         ## Actualización de registros
         Este método permite actualizar uno o varios registros en el modelo
@@ -936,22 +1194,29 @@ class OdooAPIManager():
         >>> # True
         """
 
-        # Conversión a lista de enteros si la entrada es una ID en entero
-        if isinstance(record_ids, int):
-            record_ids = [record_ids]
+        # Se acondiciona el valor de datos
+        record_ids = self._convert_to_list(record_ids)
+
+        # Construcción de parámetros
+        params = Params(
+            record_ids= record_ids,
+            records_data= record_data,
+        )
 
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'write',
-            data= [record_ids, data]
+            args= params.args,
         )
+
+        return response
 
     def unlink(
         self,
-        model: odoo_names.MODELS,
-        record_ids: int | list[int],
-    ) -> bool:
+        model: ModelName,
+        record_ids: ListOrItem[RecordID],
+    ) -> Literal[True]:
         """
         ## Eliminación de registros
         Este método permite eliminar uno o varios registros en el modelo
@@ -968,22 +1233,28 @@ class OdooAPIManager():
         >>> # True
         """
 
-        # Conversión a lista de enteros si la entrada es una ID en entero
-        if isinstance(record_ids, int):
-            record_ids = [record_ids]
+        # Se acondiciona el valor de datos
+        record_ids = self._convert_to_list(record_ids)
+
+        # Construcción de parámetros
+        params = Params(
+            record_ids= record_ids
+        )
 
         # Ejecución del método de solicitud al API
-        return self._request(
+        response = self._request(
             model= model,
             method= 'unlink',
-            data= [record_ids]
+            args= params.args,
         )
+
+        return response
 
     def model_fields(
         self,
-        model: odoo_names.MODELS,
-        attributes: list[str] = fields_atts,
-        fields: list[str] | None = None,
+        model: ModelName,
+        attributes: list[FieldFields] = PRESETS.FIELDS_ATTS,
+        fields: list[ModelField] | None = None,
         output: OutputOptions | None = None,
     ) -> pd.DataFrame | list[dict]:
         """
@@ -1015,7 +1286,7 @@ class OdooAPIManager():
         Sin embargo se pueden obtener datos de otros atributos,
         específicándolos en el parámetro `atts` como una lista:
         >>> specific_atts = ["name", "field_description", "ttype"]
-        >>> odoo.data.model_fields("sale.order", atts=specific_atts)
+        >>> odoo.data.model_fields("sale.order", atts= specific_atts)
         >>> #                     name  field_description     ttype
         >>> # 0           access_token     Security Token      char
         >>> # 1             access_url  Portal Access URL      char
@@ -1041,7 +1312,7 @@ class OdooAPIManager():
         search_criteria: CriteriaStructure = [('model_id', '=', model)]
 
         # Si se especificaron los campos, se rearma el criterio de búsqueda
-        if (fields):
+        if fields:
             # Se interta el operador 'and' al principio de la lista
             search_criteria.insert(0, '&')
             # Se añade la tupla de coincidencia por nombre
@@ -1050,27 +1321,34 @@ class OdooAPIManager():
         # Obtención de los datos a partir del método de solicitud al API
         response = self.search_read(
             model= 'ir.model.fields',
-            data= search_criteria,
-            fields= attributes
+            search_criteria= search_criteria,
+            fields= attributes,
         )
 
-        # Retorno en formato de salida configurado
-        return self._build_output(response, output)
+        # Conversión en formato de salida configurado
+        converted_data = self._build_output(response, output)
 
-    def session_info(self) -> None:
+        return converted_data
+
+    def session_info(
+        self,
+    ) -> None:
         """
         ## Información de la sesión
-        Este método retorna una impresión de la información de la sesión actual:
+        Este método hace una impresión de la información de la sesión actual:
         >>> odoo.session_info()
-        >>> # base de datos: your-database-name
-        >>> # url de origen: https://your-database-name.odoo.com
-        >>> # usuario: username_api@example.com
-        >>> # token: ****************************************
+        >>> # Base de datos: your-database-name
+        >>> # URL de origen: https://your-database-name.odoo.com
+        >>> # Usuario: username_api@example.com
+        >>> # Token de API: ****************************************
         """
-        for i in self._info:
-            print(i)
+        print(self._info)
 
-    def _build_output(self, response: dict, output: OutputOptions | None) -> list[dict] | pd.DataFrame:
+    def _build_output(
+        self,
+        response: list[RecordData],
+        output: OutputOptions | None,
+    ) -> list[dict] | pd.DataFrame:
         """
         ## Formateo de salida
         Este método interno formatea la salida de las funciones de lectura
@@ -1094,48 +1372,84 @@ class OdooAPIManager():
         # Retorno de información en lista de diccionarios
         return response
 
-    def _build_params(self, **args) -> dict:
-        """
-        ## Construcción de parámetros
-        Este método interno construye un diccionario de parámetros que tienen
-        valores diferentes a None para ser usados en solicitudes al API.
-        """
+    def _convert_to_list(
+        self,
+        items: ListOrItem[_T]
+    ) -> list[_T]:
 
-        # Inicialización del diccionario a retornar
-        built_params = {}
+        # Revisión de si el elemento proporcionado no es una lista
+        if not isinstance(items, list):
+            items = [items]
 
-        # Iteración por llave y valor
-        for ( key, value ) in args.items():
-            # Si el valor es diferente a None
-            if not ( value is None ):
-                # Se añade la tupla al diccionaio a retornar
-                built_params.update({ key: value })
+        return items
 
-        # Retorno del diccionario de parámetros
-        return built_params
+    def _initialize_proxy(
+        self,
+    ) -> None:
+
+        # Parámetro de URL
+        URL_PARAM = {'url': self._credentials.url}
+        # Construcción de URLs
+        xmlrpc_common = XMLRPC_COMMON.format(**URL_PARAM)
+        xmlrpc_object = XMLRPC_OBJECT.format(**URL_PARAM)
+
+        # Creación de la conexión common para autenticar el usuario
+        self._common = client.ServerProxy(xmlrpc_common)
+        # Token de autenticación
+        self._uid = (
+            self._common
+            .authenticate(
+                self._credentials.db,
+                self._credentials.username,
+                self._credentials.token,
+                {}
+            )
+        )
+        # Creación de la conexión models para realizar solicitudes
+        self._models = client.ServerProxy(xmlrpc_object)
+
+        print(self._uid)
+
+        # Inicialización de la información de la sesión
+        self._initialize_session_info()
+
+    def _initialize_session_info(
+        self,
+    ) -> None:
+
+        self._info =  (
+            SESSION_INFO
+            .format(**{
+                'api_db': self._credentials.db,
+                'url': self._credentials.url,
+                'username': self._credentials.username,
+                'token': len(self._credentials.token) * '*',
+            })
+        )
 
     def _request(
         self,
-        model: odoo_names.MODELS,
-        method: API_METHODS,
-        data: CriteriaStructure,
-        params: dict[list, int] ={}
+        /,
+        model: ModelName,
+        method: APIMethods,
+        args: list,
+        kwargs: dict,
     ):
 
         # Se realiza la solicitud al API
         return self._models.execute_kw(
             # Base de datos de la API
-            self._env.api_db,
-            # UUID de la cuenta
+            self._credentials.db,
+            # ID del usuario
             self._uid,
-            # Token de la cuenta
-            self._env.token,
+            # Token del usuario
+            self._credentials.token,
             # Modelo de Odoo
             model,
             # Método de solicitud
             method,
-            # Criterio de búsqueda
-            data,
-            # Diccionario de parámetros
-            params
+            # Args
+            args,
+            # Kwargs
+            kwargs
         )

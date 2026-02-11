@@ -1,0 +1,8 @@
+class VARIABLE_NAME:
+    USERNAME = 'USERNAME'
+    TOKEN = 'TOKEN'
+    URL = 'URL'
+    DB = 'DB'
+    ALT_DB = 'ALT_DB'
+
+VAR_PREFIX = 'ODOO_API_'
