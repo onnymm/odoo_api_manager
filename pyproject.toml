@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "odoo_api_manager"
-version = "0.3.2"
+version = "0.3.3"
 authors = [
     {name = "Pável Hernández Reza", email = "phr2807@gmail.com" }]
 description = "Librería para el manejo de la API de Odoo."

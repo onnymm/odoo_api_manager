@@ -1483,7 +1483,7 @@ class OdooAPIManager(Generic[_O]):
         model: ModelName,
         method: APIMethods,
         args: list,
-        kwargs: dict,
+        kwargs: dict = {},
     ):
 
         # Se realiza la solicitud al API
