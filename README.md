@@ -346,7 +346,7 @@ Las columnas de atributos mostradas por defecto son las siguientes:
 
 # Herramientas
 
-# Extracción de ID desde valores Many2One
+## Extracción de ID desde valores Many2One
 
 Este método de clase permite extraer el valor de ID desde una columna de datos de tipo `many2one` proveniente de Odoo.
 
@@ -397,7 +397,7 @@ Puede proporcionarse un valor a usar en los valores nulos de los datos:
 > **PARÁMETROS**
 > 
 > - `s`*: Pandas Series de valores Many2One.
-> - `null_value` Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
+> - `null_value`; Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
 
 ## Extracción de nombre de registro referenciado desde valores Many2One
 
@@ -450,7 +450,7 @@ Puede proporcionarse un valor a usar en los valores nulos de los datos:
 > **PARÁMETROS**
 > 
 > - `s`*: Pandas Series de valores Many2One.
-> - `null_value` Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
+> - `null_value`: Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
 
 # Acerca de...
 
