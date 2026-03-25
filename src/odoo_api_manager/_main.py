@@ -19,6 +19,7 @@ from ._templates import (
     XMLRPC_OBJECT,
 )
 from ._typing.aliases import RecordID
+from ._typing.callables import SeriesApply
 from ._typing.criteria_structure import CriteriaStructure
 from ._typing.generics import (
     _O,
@@ -35,6 +36,7 @@ from ._typing.misc import (
     RecordData,
     ListOrItem,
     ModelField,
+    NullableMany2One,
     SerializableValue,
 )
 
@@ -1393,6 +1395,138 @@ class OdooAPIManager(Generic[_O]):
         >>> # Token de API: ****************************************
         """
         print(self._info)
+
+    @classmethod
+    def extract_m2o_id(
+        self,
+        s: pd.Series,
+        null_value: _T = False,
+    ) -> pd.Series:
+        """
+        ## Extracción de ID desde valores Many2One
+        Este método de clase permite extraer el valor de ID desde una columna de datos
+        de tipo `many2one` proveniente de Odoo.
+
+        Ejemplo:
+        >>> # DataFrame original
+        >>> data: pd.DataFrame
+        >>> #    id                 name                 user_id
+        >>> # 0   1           Un cliente        [1, Un vendedor]
+        >>> # 1   2  Cliente distinguido  [2, Vendedor estrella]
+        >>> # 2   3            Mostrador                   False
+        >>> # 3   4         Otro cliente                   False
+        >>> 
+        >>> (
+        >>>     data
+        >>>     # Reasignación de la columna [user_id]
+        >>>     .assign(
+        >>>         lambda df: OdooAPIManager.extract_m2o_id(
+        >>>             df['user_id']
+        >>>         )
+        >>>     )
+        >>> )
+        >>> #    id                 name  user_id
+        >>> # 0   1           Un cliente        1
+        >>> # 1   2  Cliente distinguido        2
+        >>> # 2   3            Mostrador    False
+        >>> # 3   4         Otro cliente    False
+
+        Puede proporcionarse un valor a usar en los valores nulos de los datos:
+        >>> (
+        >>>     data
+        >>>     .assign(
+        >>>         lambda df: OdooAPIManager.extract_m2o_id(
+        >>>             df['user_id'],
+        >>>             null_value= -1
+        >>>         )
+        >>>     )
+        >>> )
+        >>> #    id                 name  user_id
+        >>> # 0   1           Un cliente        1
+        >>> # 1   2  Cliente distinguido        2
+        >>> # 2   3            Mostrador        0
+        >>> # 3   4         Otro cliente        0
+        """
+
+        # Función para extraer el valor
+        fn: SeriesApply[NullableMany2One] = (
+            lambda m2o: (
+                m2o[0]
+                    if m2o
+                    else null_value
+            )
+        )
+
+        return (
+            s
+            .apply(fn)
+        )
+
+    @classmethod
+    def extract_m2o_name(
+        self,
+        s: pd.Series,
+        null_value: _T = False,
+    ) -> pd.Series:
+        """
+        ## Extracción de nombre de registro referenciado desde valores Many2One
+        Este método de clase permite extraer el valor de nombre del registro
+        referenciado desde una columna de datos de tipo `many2one` proveniente de Odoo.
+
+        Ejemplo:
+        >>> # DataFrame original
+        >>> data: pd.DataFrame
+        >>> #    id                 name                 user_id
+        >>> # 0   1           Un cliente        [1, Un vendedor]
+        >>> # 1   2  Cliente distinguido  [2, Vendedor estrella]
+        >>> # 2   3            Mostrador                   False
+        >>> # 3   4         Otro cliente                   False
+        >>> 
+        >>> (
+        >>>     data
+        >>>     # Reasignación de la columna [user_id]
+        >>>     .assign(
+        >>>         lambda df: OdooAPIManager.extract_m2o_name(
+        >>>             df['user_id']
+        >>>         )
+        >>>     )
+        >>> )
+        >>> #    id                 name            user_id
+        >>> # 0   1           Un cliente        Un vendedor
+        >>> # 1   2  Cliente distinguido  Vendedor estrella
+        >>> # 2   3            Mostrador              False
+        >>> # 3   4         Otro cliente              False
+
+        Puede proporcionarse un valor a usar en los valores nulos de los datos:
+        >>> (
+        >>>     data
+        >>>     .assign(
+        >>>         lambda df: OdooAPIManager.extract_m2o_name(
+        >>>             df['user_id'],
+        >>>             null_value= None
+        >>>         )
+        >>>     )
+        >>> )
+        >>> #    id                 name  user_id
+        >>> # 0   1           Un cliente        1
+        >>> # 1   2  Cliente distinguido        2
+        >>> # 2   3            Mostrador     None
+        >>> # 3   4         Otro cliente     None
+        """
+
+        # Función para extraer el valor
+        fn: SeriesApply[NullableMany2One] = (
+            lambda m2o: (
+                m2o[1]
+                    if m2o
+                    else null_value
+            )
+        )
+
+        return (
+            s
+            .apply(fn)
+        )
 
     def _build_output(
         self,

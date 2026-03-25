@@ -25,6 +25,9 @@ odoo_api = OdooAPIManager()
     - [Eliminación de registros](#eliminación-de-registros)
     - [Ejecución de métodos](#ejecución-de-métodos)
     - [Obtener información de los campos de un modelo](#obtener-información-de-los-campos-de-un-modelo)
+- **HERRAMIENTAS**
+    - [Extracción de ID desde valores Many2One](#extracción-de-id-desde-valores-many2one)
+    - [Extracción de nombre de registro referenciado desde valores Many2One](#extracción-de-nombre-de-registro-referenciado-desde-valores-many2one)
 - **ACERCA DE...**
     - [Configuración del entorno de trabajo](#configuración-del-entorno-de-trabajo)
     - [Formato de retorno](#formato-de-retorno)
@@ -340,6 +343,114 @@ Las columnas de atributos mostradas por defecto son las siguientes:
 > - `output`: Formato de retorno para la ejecución. Para saber más sobre cómo funciona este parámetro, consulta [Formato de retorno](#formato-de-retorno).
 
 ----
+
+# Herramientas
+
+# Extracción de ID desde valores Many2One
+
+Este método de clase permite extraer el valor de ID desde una columna de datos de tipo `many2one` proveniente de Odoo.
+
+Ejemplo:
+```py
+# DataFrame original
+data: pd.DataFrame
+#    id                 name                 user_id
+# 0   1           Un cliente        [1, Un vendedor]
+# 1   2  Cliente distinguido  [2, Vendedor estrella]
+# 2   3            Mostrador                   False
+# 3   4         Otro cliente                   False
+
+(
+    data
+    # Reasignación de la columna [user_id]
+    .assign(
+        lambda df: OdooAPIManager.extract_m2o_id(
+            df['user_id']
+        )
+    )
+)
+#    id                 name  user_id
+# 0   1           Un cliente        1
+# 1   2  Cliente distinguido        2
+# 2   3            Mostrador    False
+# 3   4         Otro cliente    False
+```
+
+Puede proporcionarse un valor a usar en los valores nulos de los datos:
+```py
+(
+    data
+    .assign(
+        lambda df: OdooAPIManager.extract_m2o_id(
+            df['user_id'],
+            null_value= -1
+        )
+    )
+)
+#    id                 name  user_id
+# 0   1           Un cliente        1
+# 1   2  Cliente distinguido        2
+# 2   3            Mostrador        0
+# 3   4         Otro cliente        0
+```
+
+> **PARÁMETROS**
+> 
+> - `s`*: Pandas Series de valores Many2One.
+> - `null_value` Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
+
+## Extracción de nombre de registro referenciado desde valores Many2One
+
+Este método de clase permite extraer el valor de nombre del registro referenciado desde una columna de datos de tipo `many2one` proveniente de Odoo.
+
+Ejemplo:
+```py
+# DataFrame original
+data: pd.DataFrame
+#    id                 name                 user_id
+# 0   1           Un cliente        [1, Un vendedor]
+# 1   2  Cliente distinguido  [2, Vendedor estrella]
+# 2   3            Mostrador                   False
+# 3   4         Otro cliente                   False
+
+(
+    data
+    # Reasignación de la columna [user_id]
+    .assign(
+        lambda df: OdooAPIManager.extract_m2o_name(
+            df['user_id']
+        )
+    )
+)
+#    id                 name            user_id
+# 0   1           Un cliente        Un vendedor
+# 1   2  Cliente distinguido  Vendedor estrella
+# 2   3            Mostrador              False
+# 3   4         Otro cliente              False
+```
+
+Puede proporcionarse un valor a usar en los valores nulos de los datos:
+```py
+(
+    data
+    .assign(
+        lambda df: OdooAPIManager.extract_m2o_name(
+            df['user_id'],
+            null_value= None
+        )
+    )
+)
+#    id                 name  user_id
+# 0   1           Un cliente        1
+# 1   2  Cliente distinguido        2
+# 2   3            Mostrador     None
+# 3   4         Otro cliente     None
+```
+
+> **PARÁMETROS**
+> 
+> - `s`*: Pandas Series de valores Many2One.
+> - `null_value` Valor a usar en donde `False` sea encontrado en lugar de un valor Many2One.
 
 # Acerca de...
 

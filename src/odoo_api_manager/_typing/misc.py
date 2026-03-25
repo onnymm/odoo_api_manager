@@ -3,5 +3,6 @@ from ._structures.misc import (
     AltDatabaseArg,
     ListOrItem,
     ModelField,
+    NullableMany2One,
     SerializableValue,
 )
