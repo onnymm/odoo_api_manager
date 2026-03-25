@@ -1,4 +1,4 @@
-from .._typing import FieldFields
+from .._typing.literals import FieldFields
 
 class PRESETS:
 

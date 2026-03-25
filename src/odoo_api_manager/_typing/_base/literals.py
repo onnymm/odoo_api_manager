@@ -6,6 +6,21 @@ APIMethods = Literal['check_access_rights', 'search', 'search_read', 'search_cou
 
 AccessRights = Literal["create", "read", "write", "unlink"]
 
+LogicOperator = Literal["&", "|"]
+
+ComparisonOperator = Literal[
+    "=",
+    "!=",
+    "in",
+    "not in",
+    "ilike",
+    "not ilike",
+    ">",
+    "<",
+    ">=",
+    "<=",
+]
+
 MostCommonFields = Literal[
     'access_token',
     'access_url',

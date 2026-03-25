@@ -1,9 +1,9 @@
 from typing import Optional
-from .._typing import (
-    CriteriaStructure,
+from .._typing.aliases import RecordID
+from .._typing.criteria_structure import CriteriaStructure
+from .._typing.literals import AccessRights
+from .._typing.misc import (
     RecordData,
-    RecordID,
-    AccessRights,
     ListOrItem,
     ModelField,
     SerializableValue,

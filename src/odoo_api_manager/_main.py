@@ -4,7 +4,6 @@ from typing import (
     Literal,
     Generic,
     Optional,
-    Union,
     overload,
 )
 from ._resources import (
@@ -19,26 +18,25 @@ from ._templates import (
     XMLRPC_COMMON,
     XMLRPC_OBJECT,
 )
-from ._typing import (
+from ._typing.aliases import RecordID
+from ._typing.criteria_structure import CriteriaStructure
+from ._typing.generics import (
     _O,
     _T,
-    CriteriaStructure,
-    RecordData,
-    RecordID,
+)
+from ._typing.literals import (
     AccessRights,
     APIMethods,
     FieldFields,
-    ListOrItem,
-    ModelField,
     ModelName,
     OutputOptions,
+)
+from ._typing.misc import (
+    RecordData,
+    ListOrItem,
+    ModelField,
     SerializableValue,
 )
-
-class DatabaseNotDefinedError(Exception):
-    ...
-
-DatabaseArg = Union[str, bool]
 
 class OdooAPIManager(Generic[_O]):
     """

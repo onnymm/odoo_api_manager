@@ -6,7 +6,7 @@ from .._constants import VARIABLE_NAME
 from .._core import env
 from .._errors import DatabaseNotDefinedError
 from .._settings import CREDENTIALS_CONFIG
-from .._typing import AltDatabaseArg
+from .._typing.misc import AltDatabaseArg
 
 class Credentials():
 
